@@ -1,0 +1,36 @@
+# ==========================
+# Root Project
+# ==========================
+
+node_modules/
+package-lock.json
+
+# ==========================
+# React (Frontend)
+# ==========================
+
+fe-in/node_modules/
+fe-in/dist/
+
+# Environment
+fe-in/.env
+
+# ==========================
+# Laravel (Backend)
+# ==========================
+
+be-in/vendor/
+be-in/node_modules/
+be-in/public/build/
+be-in/storage/logs/
+be-in/bootstrap/cache/
+be-in/.env
+
+# ==========================
+# IDE & OS
+# ==========================
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
