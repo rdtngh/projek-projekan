@@ -6,20 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('training_batches', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('training_id')
+                ->constrained('trainings')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->string('batch_name');
+
+            $table->date('start_date');
+
+            $table->date('end_date');
+
+            $table->boolean('status')->default(true);
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('training_batches');

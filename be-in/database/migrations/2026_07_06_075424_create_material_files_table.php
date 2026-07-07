@@ -12,8 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('material_files', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('material_id')
+                ->constrained('materials')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->string('file_name');
+
+            $table->string('file_path');
+
+            $table->string('file_type');
+
+            $table->unsignedBigInteger('file_size')->nullable();
+
             $table->timestamps();
+
         });
     }
 

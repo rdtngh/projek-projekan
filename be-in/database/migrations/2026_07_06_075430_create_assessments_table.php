@@ -12,8 +12,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('assessments', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('training_id')
+                ->constrained('trainings')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->enum('type', ['PRETEST', 'POSTTEST']);
+
+            $table->string('title');
+
+            $table->text('description')->nullable();
+
+            $table->unsignedSmallInteger('duration');
+
+            $table->boolean('status')->default(true);
+
             $table->timestamps();
+
         });
     }
 

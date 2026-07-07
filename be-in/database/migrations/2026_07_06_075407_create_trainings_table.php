@@ -12,8 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('trainings', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('category_id')
+                ->constrained('categories')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->foreignId('created_by')
+                ->constrained('users')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->string('title');
+
+            $table->text('description')->nullable();
+
+            $table->string('thumbnail')->nullable();
+
+            $table->unsignedTinyInteger('passing_grade');
+
+            $table->boolean('status')->default(true);
+
             $table->timestamps();
+
         });
     }
 

@@ -12,8 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('questions', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('assessment_id')
+                ->constrained('assessments')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->text('question');
+
+            $table->unsignedSmallInteger('question_order');
+
             $table->timestamps();
+
         });
     }
 

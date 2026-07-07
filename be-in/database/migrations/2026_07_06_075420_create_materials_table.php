@@ -12,8 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('materials', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('training_id')
+                ->constrained('trainings')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->string('title');
+
+            $table->text('description')->nullable();
+
+            $table->unsignedInteger('order_number');
+
+            $table->boolean('status')->default(true);
+
             $table->timestamps();
+
         });
     }
 

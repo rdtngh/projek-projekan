@@ -12,8 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('certificates', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('enrollment_id')
+                ->constrained('enrollments')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->string('certificate_number')->unique();
+
+            $table->string('verification_code')->unique();
+
+            $table->date('issued_date');
+
+            $table->string('pdf_path');
+
             $table->timestamps();
+
         });
     }
 

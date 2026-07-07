@@ -12,8 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_answers', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('assessment_attempt_id')
+                ->constrained('assessment_attempts')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('question_id')
+                ->constrained('questions')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
+            $table->foreignId('question_option_id')
+                ->constrained('question_options')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->timestamps();
+
+            // Custom Unique Index (menghindari nama index terlalu panjang)
+            $table->unique(
+                ['assessment_attempt_id', 'question_id'],
+                'user_answer_unique'
+            );
         });
     }
 
