@@ -6,6 +6,6 @@ Route::get('/', function () {
     return response()->json([
         'application' => 'Advent Training API',
         'version' => '1.0.0',
-        'status' => 'Running'
+        'status' => 'Running',
     ]);
 });

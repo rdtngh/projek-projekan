@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('trainings', function (Blueprint $table) {
@@ -16,12 +19,20 @@ return new class extends Migration
 
             $table->text('description')->nullable();
 
+            $table->date('start_date')->nullable();
+
+            $table->date('end_date')->nullable();
+
             $table->boolean('is_active')->default(true);
 
             $table->timestamps();
+
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('trainings');

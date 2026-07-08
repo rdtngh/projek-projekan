@@ -1,9 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
 
-Route::get('/hello', function () {
-    return response()->json([
-        'message' => 'Backend Advent Training API is running.'
-    ]);
+Route::post('/login', [LoginController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('/logout', [LoginController::class, 'logout']);
+
+    Route::get('/me', [LoginController::class, 'me']);
+
 });

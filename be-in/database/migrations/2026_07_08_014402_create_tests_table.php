@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('tests', function (Blueprint $table) {
@@ -13,20 +16,27 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('training_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->enum('type', [
                 'pretest',
                 'posttest'
             ]);
 
-            $table->integer('passing_score')->default(70);
+            $table->unsignedInteger('duration');
+
+            $table->unsignedInteger('passing_score')->default(70);
 
             $table->timestamps();
+
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('tests');
