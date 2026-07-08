@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('material_files', function (Blueprint $table) {
@@ -16,9 +13,8 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('material_id')
-                ->constrained('materials')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                  ->constrained()
+                  ->cascadeOnDelete();
 
             $table->string('file_name');
 
@@ -26,16 +22,10 @@ return new class extends Migration
 
             $table->string('file_type');
 
-            $table->unsignedBigInteger('file_size')->nullable();
-
             $table->timestamps();
-
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('material_files');

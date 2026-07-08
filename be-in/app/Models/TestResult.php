@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AssessmentAttempt extends Model
+class TestResult extends Model
 {
     //
 }

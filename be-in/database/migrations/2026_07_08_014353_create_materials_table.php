@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('materials', function (Blueprint $table) {
@@ -16,26 +13,20 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('training_id')
-                ->constrained('trainings')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
+                  ->constrained()
+                  ->cascadeOnUpdate()
+                  ->cascadeOnDelete();
 
             $table->string('title');
 
-            $table->text('description')->nullable();
+            $table->string('speaker');
 
-            $table->unsignedInteger('order_number');
-
-            $table->boolean('status')->default(true);
+            $table->integer('order_number');
 
             $table->timestamps();
-
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('materials');
