@@ -1,0 +1,46 @@
+.edit-material-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.edit-material-dialog {
+  position: relative;
+  width: min(100%, 720px);
+  padding: 24px;
+  border: 1px solid #327537;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.2);
+}
+
+.edit-material-title {
+  margin: 0 0 20px 0;
+  color: #1f2937;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.edit-material-cancel {
+  margin-top: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: transparent;
+  color: #374151;
+  padding: 10px 18px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edit-material-cancel:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

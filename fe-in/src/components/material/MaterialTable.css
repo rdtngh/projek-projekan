@@ -1,0 +1,70 @@
+.material-table-wrap {
+  overflow-x: auto;
+}
+
+.material-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.material-table th {
+  padding: 14px 18px;
+  background: #eceaea;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.material-table th:last-child {
+  width: 260px;
+}
+
+.material-table td {
+  padding: 18px;
+  border-bottom: 1px solid #111827;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.material-table-empty {
+  text-align: center;
+  color: #6b7280;
+}
+
+.material-table-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 30px;
+}
+
+.material-action {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.material-action-delete {
+  color: #ff0000;
+}
+
+.material-action-open,
+.material-action-edit {
+  color: #0000ff;
+}
+
+@media (max-width: 768px) {
+  .material-table th,
+  .material-table td {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .material-table-actions {
+    gap: 20px;
+  }
+}

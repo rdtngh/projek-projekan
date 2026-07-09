@@ -9,11 +9,13 @@ import DashboardEmployee from "../pages/employee/DashboardEmployee";
 
 // Admin
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
+import ManageMaterialAdmin from "../pages/admin/ManageMaterial";
 import ManageExamAdmin from "../pages/admin/ManageExam";
 
 // Super Admin
 import DashboardSuperAdmin from "../pages/superadmin/DashboardSuperAdmin";
 import UserManagement from "../pages/superadmin/UserManagement";
+import ManageMaterialSuperAdmin from "../pages/superadmin/ManageMaterial";
 import ManageExamSuperAdmin from "../pages/superadmin/ManageExam";
 
 // Error Page
@@ -49,6 +51,11 @@ function AppRouter() {
           element={<ManageExamAdmin />}
         />
 
+        <Route
+          path="/admin/manage-materi"
+          element={<ManageMaterialAdmin />}
+        />
+
 
         {/* ================= SUPER ADMIN ================= */}
 
@@ -65,6 +72,11 @@ function AppRouter() {
         <Route
           path="/superadmin/manage-exam"
           element={<ManageExamSuperAdmin />}
+        />
+
+        <Route
+          path="/superadmin/manage-materi"
+          element={<ManageMaterialSuperAdmin />}
         />
 
 
