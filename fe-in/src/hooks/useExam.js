@@ -1,0 +1,161 @@
+import { useState, useCallback } from "react";
+import * as examService from "../services/examService";
+
+export const useExam = () => {
+  const [questions, setQuestions] = useState([]);
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  // Validasi form
+  const validateQuestion = (formData) => {
+    const newErrors = {};
+
+    if (!formData.question?.trim()) {
+      newErrors.question = "Soal wajib diisi";
+    }
+    if (!formData.options?.a?.trim()) {
+      newErrors.optionA = "Option A wajib diisi";
+    }
+    if (!formData.options?.b?.trim()) {
+      newErrors.optionB = "Option B wajib diisi";
+    }
+    if (!formData.options?.c?.trim()) {
+      newErrors.optionC = "Option C wajib diisi";
+    }
+    if (!formData.options?.d?.trim()) {
+      newErrors.optionD = "Option D wajib diisi";
+    }
+    if (!formData.correctAnswer) {
+      newErrors.correctAnswer = "Jawaban benar wajib dipilih";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Load semua questions
+  const loadQuestions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await examService.getAllExam();
+      setQuestions(data);
+    } catch (error) {
+      console.error("Error loading questions:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Add question baru
+  const addQuestion = useCallback(
+    async (formData) => {
+      if (!validateQuestion(formData)) {
+        return false;
+      }
+
+      setLoading(true);
+      try {
+        await examService.createExam(formData);
+        await loadQuestions();
+        return true;
+      } catch (error) {
+        console.error("Error adding question:", error);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadQuestions]
+  );
+
+  // Update question
+  const updateQuestion = useCallback(
+    async (id, formData) => {
+      if (!validateQuestion(formData)) {
+        return false;
+      }
+
+      setLoading(true);
+      try {
+        await examService.updateExam(id, formData);
+        await loadQuestions();
+        resetForm();
+        return true;
+      } catch (error) {
+        console.error("Error updating question:", error);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadQuestions]
+  );
+
+  // Delete question
+  const deleteQuestion = useCallback(async (id) => {
+    setLoading(true);
+    try {
+      await examService.deleteExam(id);
+      await loadQuestions();
+      return true;
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      return false;
+    } finally {
+      setLoading(false);
+      setShowDeleteDialog(false);
+      setDeletingId(null);
+    }
+  }, [loadQuestions]);
+
+  // Set question untuk di-edit
+  const handleEdit = (question) => {
+    setSelectedQuestion(question);
+    setIsEditing(true);
+    setErrors({});
+  };
+
+  // Buka dialog delete
+  const handleDelete = (id) => {
+    setDeletingId(id);
+    setShowDeleteDialog(true);
+  };
+
+  // Reset form ke state awal
+  const resetForm = () => {
+    setSelectedQuestion(null);
+    setIsEditing(false);
+    setErrors({});
+  };
+
+  // Close delete dialog
+  const closeDeleteDialog = () => {
+    setShowDeleteDialog(false);
+    setDeletingId(null);
+  };
+
+  return {
+    // State
+    questions,
+    selectedQuestion,
+    isEditing,
+    loading,
+    showDeleteDialog,
+    deletingId,
+    errors,
+    // Functions
+    loadQuestions,
+    validateQuestion,
+    addQuestion,
+    updateQuestion,
+    deleteQuestion,
+    handleEdit,
+    handleDelete,
+    resetForm,
+    closeDeleteDialog,
+  };
+};

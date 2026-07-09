@@ -26,9 +26,17 @@
   color: #6b7280;
 }
 
+.user-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .muted {
   color: #9ca3af;
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .btn-edit {
@@ -37,7 +45,6 @@
   color: #2563eb;
   padding: 6px 10px;
   border-radius: 6px;
-  margin-right: 8px;
   cursor: pointer;
 }
 

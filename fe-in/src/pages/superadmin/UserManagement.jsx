@@ -1,67 +1,90 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
-import "./UserManagement.css";
 import UserForm from "../../components/user/UserForm";
 import UserTable from "../../components/user/UserTable";
-
-import addIcon from "../../assets/icons/icon-tambahpengguna.svg";
+import EditUserDialog from "../../components/user/EditUserDialog";
+import DeleteUserDialog from "../../components/user/DeleteUserDialog";
+import { useUsers } from "../../hooks/useUsers";
+import "./UserManagement.css";
 
 function UserManagement() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "Super Admin", email: "super@rsabl.test", role: "Super Admin" },
-    { id: 2, name: "Admin Utama", email: "admin1@rsabl.test", role: "Admin" },
-    { id: 3, name: "Karyawan A", email: "karyawan1@rsabl.test", role: "Karyawan" },
-  ]);
+  const { users, loading, loadUsers, addUser, updateUser, deleteUser } = useUsers();
+  const [editingUser, setEditingUser] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState(null);
+  const [toast, setToast] = useState("");
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
-  function openAdd() {
-    setEditing(null);
-    setModalOpen(true);
+  useEffect(() => {
+    if (!toast) return undefined;
+
+    const timer = window.setTimeout(() => setToast(""), 2400);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  async function handleAdd(payload) {
+    await addUser(payload);
   }
 
-  function openEdit(user) {
-    setEditing(user);
-    setModalOpen(true);
-  }
-
-  function handleSave(payload) {
-    if (payload.id) {
-      setUsers((prev) => prev.map((u) => (u.id === payload.id ? payload : u)));
-    } else {
-      const nextId = Math.max(...users.map((u) => u.id)) + 1;
-      setUsers((prev) => [...prev, { ...payload, id: nextId }]);
+  async function handleEdit(payload) {
+    const success = await updateUser(payload.id, payload);
+    if (success) {
+      setEditingUser(null);
     }
-    setModalOpen(false);
   }
 
-  function handleDelete(id) {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+  function openDeleteDialog(id) {
+    const selectedUser = users.find((user) => user.id === id);
+    if (selectedUser?.role === "Super Admin") return;
+
+    setDeletingUserId(id);
+  }
+
+  async function confirmDelete() {
+    const success = await deleteUser(deletingUserId);
+    if (success) {
+      setDeletingUserId(null);
+      setToast("Pengguna berhasil dihapus.");
+    }
   }
 
   return (
     <DashboardLayout role="superadmin">
-      <section className="user-management-card">
-        <div className="user-management-header">
-          <h1 className="user-management-title">Kelola Pengguna</h1>
+      <div className="user-management-page">
+        <section className="user-management-card">
+          <div className="user-management-header">
+            <h1 className="user-management-title">Data Pengguna</h1>
+          </div>
 
-          <button className="user-management-add-btn" onClick={openAdd}>
-            <img src={addIcon} alt="" className="user-management-add-icon" />
-            Tambah Pengguna
-          </button>
-        </div>
-
-        <UserTable users={users} onEdit={openEdit} onDelete={handleDelete} />
-
-        {modalOpen && (
-          <UserForm
-            user={editing}
-            onClose={() => setModalOpen(false)}
-            onSave={handleSave}
+          <UserTable
+            users={users}
+            onEdit={setEditingUser}
+            onDelete={openDeleteDialog}
           />
-        )}
-      </section>
+        </section>
+
+        <section className="user-management-card user-management-add-card">
+          <UserForm mode="add" onSubmit={handleAdd} disabled={loading} />
+        </section>
+      </div>
+
+      <EditUserDialog
+        isOpen={Boolean(editingUser)}
+        user={editingUser}
+        onSave={handleEdit}
+        onCancel={() => setEditingUser(null)}
+        loading={loading}
+      />
+
+      <DeleteUserDialog
+        isOpen={Boolean(deletingUserId)}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeletingUserId(null)}
+      />
+
+      {toast && <div className="user-management-toast">{toast}</div>}
     </DashboardLayout>
   );
 }

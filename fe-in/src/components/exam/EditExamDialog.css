@@ -1,0 +1,29 @@
+.edit-exam-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 55;
+}
+
+.edit-exam-dialog {
+  width: min(100%, 720px);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+.edit-exam-dialog .exam-form-container {
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .edit-exam-overlay {
+    padding: 16px;
+    align-items: flex-start;
+  }
+}

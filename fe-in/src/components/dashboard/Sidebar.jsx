@@ -2,9 +2,12 @@ import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
 import iconHome from "../../assets/icons/icon-berandaputih.svg";
+import iconHomeActive from "../../assets/icons/icon-berandahitam.svg";
 import iconUsers from "../../assets/icons/icon-kelolapenggunaputih.svg";
+import iconUsersActive from "../../assets/icons/icon-kelolapenggunahitam.svg";
 import iconMateri from "../../assets/icons/icon-kelola-materi.svg";
 import iconExam from "../../assets/icons/icon-kelolaujianputih.svg";
+import iconExamActive from "../../assets/icons/icon-kelolaujianhitam.svg";
 import iconLogout from "../../assets/icons/icon-logout.svg";
 import iconPreTest from "../../assets/icons/icon-kelolaujianputih.svg";
 import iconPostTest from "../../assets/icons/icon-posttest.svg";
@@ -12,20 +15,55 @@ import iconMaterial from "../../assets/icons/icon-kelola-materi.svg";
 
 const menuByRole = {
   superadmin: [
-    { label: "Dashboard", to: "/superadmin", icon: iconHome },
-    { label: "Kelola Pengguna", to: "/superadmin/manage-user", icon: iconUsers },
+    {
+      label: "Dashboard",
+      to: "/superadmin",
+      icon: iconHome,
+      activeIcon: iconHomeActive,
+    },
+    {
+      label: "Kelola Pengguna",
+      to: "/superadmin/manage-user",
+      icon: iconUsers,
+      activeIcon: iconUsersActive,
+    },
     { label: "Kelola Materi", to: "/superadmin/manage-materi", icon: iconMateri },
-    { label: "Kelola Ujian", to: "/superadmin/manage-exam", icon: iconExam },
+    {
+      label: "Kelola Ujian",
+      to: "/superadmin/manage-exam",
+      icon: iconExam,
+      activeIcon: iconExamActive,
+    },
   ],
   admin: [
-    { label: "Dashboard", to: "/admin", icon: iconHome },
+    {
+      label: "Dashboard",
+      to: "/admin",
+      icon: iconHome,
+      activeIcon: iconHomeActive,
+    },
     { label: "Kelola Materi", to: "/admin/manage-materi", icon: iconMateri },
-    { label: "Kelola Ujian", to: "/admin/manage-exam", icon: iconExam },
+    {
+      label: "Kelola Ujian",
+      to: "/admin/manage-exam",
+      icon: iconExam,
+      activeIcon: iconExamActive,
+    },
   ],
   employee: [
-    { label: "Dashboard", to: "/employee", icon: iconHome },
+    {
+      label: "Dashboard",
+      to: "/employee",
+      icon: iconHome,
+      activeIcon: iconHomeActive,
+    },
     { label: "Materi", to: "/employee/materi", icon: iconMaterial },
-    { label: "Pre-Test", to: "/employee/pretest", icon: iconPreTest },
+    {
+      label: "Pre-Test",
+      to: "/employee/pretest",
+      icon: iconPreTest,
+      activeIcon: iconExamActive,
+    },
     { label: "Post-Test", to: "/employee/posttest", icon: iconPostTest },
   ],
 };
@@ -45,8 +83,16 @@ function Sidebar({ role = "superadmin" }) {
               `sidebar-link${isActive ? " active" : ""}`
             }
           >
-            <img src={item.icon} alt="" className="sidebar-icon" />
-            <span>{item.label}</span>
+            {({ isActive }) => (
+              <>
+                <img
+                  src={isActive && item.activeIcon ? item.activeIcon : item.icon}
+                  alt=""
+                  className={`sidebar-icon${item.activeIcon ? " sidebar-icon-stateful" : ""}`}
+                />
+                <span>{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>

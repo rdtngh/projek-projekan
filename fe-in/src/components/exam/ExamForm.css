@@ -1,0 +1,182 @@
+/* Exam Form Styling */
+.exam-form-container {
+  padding: 20px;
+  border: 2px solid #327537;
+  background: #ffffff;
+  border-radius: 8px;
+  margin-top: 24px;
+}
+
+.exam-form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.exam-form-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.exam-form-title {
+  margin: 0;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.exam-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.exam-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.exam-form-label {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.exam-form-input,
+.exam-form-select {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.95rem;
+  color: #1f2937;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.exam-form-input:focus,
+.exam-form-select:focus {
+  border-bottom-color: #327537;
+  color: #1f2937;
+}
+
+.exam-form-input.error,
+.exam-form-select.error {
+  border-bottom-color: #ef4444;
+}
+
+.exam-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  padding: 10px 0;
+  font-family: "Instrument Sans", sans-serif;
+}
+
+.exam-form-error {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.85rem;
+  color: #ef4444;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Select Dropdown Styling */
+.exam-form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231f2937' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  padding-right: 18px;
+}
+
+.exam-form-select option {
+  color: #1f2937;
+  background: #ffffff;
+  padding: 8px;
+}
+
+/* Form Actions */
+.exam-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.exam-form-btn {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.exam-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.exam-form-btn-submit {
+  background: #327537;
+  color: #ffffff;
+}
+
+.exam-form-btn-submit:hover:not(:disabled) {
+  background: #275c2a;
+}
+
+.exam-form-btn-cancel {
+  background: transparent;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.exam-form-btn-cancel:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .exam-form-container {
+    padding: 16px;
+    margin-top: 20px;
+  }
+
+  .exam-form-header {
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .exam-form-title {
+    font-size: 1rem;
+  }
+
+  .exam-form {
+    gap: 14px;
+  }
+
+  .exam-form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .exam-form-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

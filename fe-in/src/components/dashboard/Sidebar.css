@@ -43,10 +43,6 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-.sidebar-link.active .sidebar-icon {
-  filter: brightness(0);
-}
-
 .sidebar-icon {
   width: 24px;
   height: 24px;

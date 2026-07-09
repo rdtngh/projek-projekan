@@ -9,10 +9,12 @@ import DashboardEmployee from "../pages/employee/DashboardEmployee";
 
 // Admin
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
+import ManageExamAdmin from "../pages/admin/ManageExam";
 
 // Super Admin
 import DashboardSuperAdmin from "../pages/superadmin/DashboardSuperAdmin";
 import UserManagement from "../pages/superadmin/UserManagement";
+import ManageExamSuperAdmin from "../pages/superadmin/ManageExam";
 
 // Error Page
 import NotFoundPage from "../pages/NotFoundPage";
@@ -42,6 +44,11 @@ function AppRouter() {
           element={<DashboardAdmin />}
         />
 
+        <Route
+          path="/admin/manage-exam"
+          element={<ManageExamAdmin />}
+        />
+
 
         {/* ================= SUPER ADMIN ================= */}
 
@@ -53,6 +60,11 @@ function AppRouter() {
         <Route
           path="/superadmin/manage-user"
           element={<UserManagement />}
+        />
+
+        <Route
+          path="/superadmin/manage-exam"
+          element={<ManageExamSuperAdmin />}
         />
 
 

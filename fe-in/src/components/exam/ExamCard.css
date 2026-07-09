@@ -1,0 +1,156 @@
+/* Exam Card Styling */
+.exam-card {
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.exam-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.exam-card-number {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1f2937;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.exam-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.exam-card-btn {
+  min-width: 56px;
+  height: 32px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.exam-card-btn:hover {
+  background: #f9fafb;
+}
+
+.exam-card-btn-edit {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.exam-card-btn-edit:hover {
+  background: #eff6ff;
+}
+
+.exam-card-btn-delete {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.exam-card-btn-delete:hover {
+  background: #fef2f2;
+}
+
+.exam-card-question {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.exam-card-options {
+  margin-bottom: 0;
+}
+
+.exam-card-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.exam-card-option:last-child {
+  margin-bottom: 0;
+}
+
+.exam-card-radio {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+}
+
+.exam-card-radio.active {
+  border-color: #22c55e;
+  background: radial-gradient(circle, #22c55e 45%, transparent 48%);
+}
+
+.exam-card-option-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.exam-card-correct-label {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #327537;
+  background: #f0fdf4;
+  padding: 4px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-left: 12px;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .exam-card {
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .exam-card-question {
+    font-size: 0.95rem;
+  }
+
+  .exam-card-option {
+    font-size: 0.9rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .exam-card-correct-label {
+    margin-left: 26px;
+  }
+}
