@@ -25,14 +25,25 @@ function UserManagement() {
   }, [toast]);
 
   async function handleAdd(payload) {
-    await addUser(payload);
+    const result = await addUser(payload);
+    if (result !== true) {
+      setToast(result);
+      return false;
+    }
+    setToast("Pengguna berhasil ditambahkan.");
+    return true;
   }
 
   async function handleEdit(payload) {
-    const success = await updateUser(payload.id, payload);
-    if (success) {
+    const result = await updateUser(payload.id, payload);
+    if (result === true) {
       setEditingUser(null);
+      setToast("Pengguna berhasil diperbarui.");
+      return true;
     }
+
+    setToast(result);
+    return false;
   }
 
   function openDeleteDialog(id) {

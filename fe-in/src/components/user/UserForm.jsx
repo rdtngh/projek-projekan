@@ -61,11 +61,12 @@ function UserForm({
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
 
-    onSubmit(form);
+    const success = await onSubmit(form);
+    if (!success) return;
 
     if (mode === "add") {
       setForm(initialForm);

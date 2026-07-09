@@ -1,46 +1,33 @@
-import { createCrudStorage } from "./crudStorage";
+import api from "./api";
 
-const initialUsers = [
-  {
-    id: 1,
-    user: "Super Admin",
-    userId: "SA001",
-    department: "Manajemen",
-    role: "Super Admin",
-  },
-  {
-    id: 2,
-    user: "Admin Utama",
-    userId: "AD001",
-    department: "IT",
-    role: "Admin",
-  },
-  {
-    id: 3,
-    user: "Karyawan A",
-    userId: "KY001",
-    department: "Pelayanan",
-    role: "Karyawan",
-  },
-];
-
-const userStorage = createCrudStorage({
-  storageKey: "rsabl_users",
-  initialData: initialUsers,
+const mapToApiPayload = (payload) => ({
+  employee_number: payload.userId,
+  name: payload.user,
+  department: payload.department,
+  role: payload.role,
 });
 
-export const getData = async () => userStorage.getData();
+const mapFromApiResponse = (user) => ({
+  id: user.id,
+  user: user.user,
+  userId: user.userId,
+  department: user.department,
+  role: user.role,
+});
 
-export const saveData = async (data) => userStorage.saveData(data);
+export const getAllUsers = async () => {
+  const response = await api.get("/users");
+  return response.data?.data?.map(mapFromApiResponse) ?? [];
+};
 
-export const addItem = async (userData) => userStorage.addItem(userData);
+export const createUser = async (payload) => {
+  await api.post("/users", mapToApiPayload(payload));
+};
 
-export const updateItem = async (id, userData) =>
-  userStorage.updateItem(id, userData);
+export const updateUser = async (id, payload) => {
+  await api.put(`/users/${id}`, mapToApiPayload(payload));
+};
 
-export const deleteItem = async (id) => userStorage.deleteItem(id);
-
-export const getAllUsers = getData;
-export const createUser = addItem;
-export const updateUser = updateItem;
-export const deleteUser = deleteItem;
+export const deleteUser = async (id) => {
+  await api.delete(`/users/${id}`);
+};

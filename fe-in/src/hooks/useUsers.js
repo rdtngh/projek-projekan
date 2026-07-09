@@ -26,7 +26,7 @@ export const useUsers = () => {
         return true;
       } catch (error) {
         console.error("Error adding user:", error);
-        return false;
+        return error.response?.data?.message || "Gagal menambahkan pengguna.";
       } finally {
         setLoading(false);
       }
@@ -43,7 +43,7 @@ export const useUsers = () => {
         return true;
       } catch (error) {
         console.error("Error updating user:", error);
-        return false;
+        return error.response?.data?.message || "Gagal memperbarui pengguna.";
       } finally {
         setLoading(false);
       }
