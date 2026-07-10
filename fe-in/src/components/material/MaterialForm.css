@@ -71,6 +71,47 @@
   font-size: 0.82rem;
 }
 
+.material-bulk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.material-bulk-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.material-bulk-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #e8f2e9;
+  color: #17491f;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.material-bulk-fields {
+  min-width: 0;
+}
+
+.material-bulk-file {
+  display: block;
+  overflow: hidden;
+  color: #4b5563;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .material-submit-btn {
   margin-top: 2px;
   min-height: 56px;

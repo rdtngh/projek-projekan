@@ -20,6 +20,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/trainings/{training}/materials', [TrainingController::class, 'materials']);
 
     Route::get('/materials/{material}', [MaterialController::class, 'show']);
+    Route::post('/materials', [MaterialController::class, 'store']);
+    Route::post('/materials/bulk', [MaterialController::class, 'bulkStore']);
+    Route::put('/materials/{material}', [MaterialController::class, 'update']);
+    Route::delete('/materials/{material}', [MaterialController::class, 'destroy']);
     Route::get('/materials/{material}/files', [MaterialController::class, 'files']);
 
     Route::get('/tests/{test}', [TestController::class, 'show']);

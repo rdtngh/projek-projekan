@@ -1,13 +1,23 @@
 import axios from "axios";
 
-const token = typeof window !== "undefined" ? window.localStorage.getItem("authToken") : null;
-
 const api = axios.create({
     baseURL: "http://127.0.0.1:8000/api",
-    headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+});
+
+api.interceptors.request.use((config) => {
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("authToken") : null;
+
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (config.data instanceof FormData) {
+        delete config.headers["Content-Type"];
+    } else {
+        config.headers["Content-Type"] = "application/json";
+    }
+
+    return config;
 });
 
 export default api;

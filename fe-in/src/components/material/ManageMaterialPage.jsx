@@ -10,20 +10,6 @@ import listIcon from "../../assets/icons/icon-daftar-materi.svg";
 import addIcon from "../../assets/icons/icon-tambahmateri.svg";
 import "./ManageMaterialPage.css";
 
-const dataUrlToBlob = (dataUrl) => {
-  const [header, base64Data] = dataUrl.split(",");
-  const mimeMatch = header.match(/data:(.*?);base64/);
-  const mimeType = mimeMatch?.[1] || "application/octet-stream";
-  const binaryString = window.atob(base64Data);
-  const bytes = new Uint8Array(binaryString.length);
-
-  for (let index = 0; index < binaryString.length; index += 1) {
-    bytes[index] = binaryString.charCodeAt(index);
-  }
-
-  return new Blob([bytes], { type: mimeType });
-};
-
 function ManageMaterialPage({ role }) {
   const {
     materials,
@@ -34,7 +20,7 @@ function ManageMaterialPage({ role }) {
     deleteMaterial,
   } = useMaterials();
   const [addFileName, setAddFileName] = useState("");
-  const [addFile, setAddFile] = useState(null);
+  const [addFiles, setAddFiles] = useState([]);
   const [addResetSignal, setAddResetSignal] = useState(0);
   const [pendingAdd, setPendingAdd] = useState(null);
   const [editingMaterial, setEditingMaterial] = useState(null);
@@ -71,8 +57,9 @@ function ManageMaterialPage({ role }) {
 
   function handleUploadSelect(file) {
     if (uploadTarget === "add") {
-      setAddFileName(file.fileName);
-      setAddFile(file);
+      const files = Array.isArray(file) ? file : [file];
+      setAddFileName(files.length === 1 ? files[0].fileName : `${files.length} file dipilih`);
+      setAddFiles(files);
     }
 
     if (uploadTarget === "edit") {
@@ -84,22 +71,19 @@ function ManageMaterialPage({ role }) {
   }
 
   function openMaterialFile(material) {
-    if (!material.fileData) {
+    const file = material.files && material.files[0];
+    if (!file) {
       setToast("File materi belum tersedia untuk dibuka.");
       return;
     }
 
-    const blob = dataUrlToBlob(material.fileData);
-    const fileUrl = window.URL.createObjectURL(blob);
+    const fileUrl = file.file_path;
     const newWindow = window.open(fileUrl, "_blank");
 
     if (!newWindow) {
-      window.URL.revokeObjectURL(fileUrl);
       setToast("Popup browser diblokir. Izinkan popup untuk membuka file.");
       return;
     }
-
-    window.setTimeout(() => window.URL.revokeObjectURL(fileUrl), 60000);
   }
 
   async function confirmAdd() {
@@ -109,9 +93,9 @@ function ManageMaterialPage({ role }) {
     if (success) {
       setPendingAdd(null);
       setAddFileName("");
-      setAddFile(null);
+      setAddFiles([]);
       setAddResetSignal((current) => current + 1);
-      setToast("Materi berhasil ditambahkan.");
+      setToast(pendingAdd.items?.length > 1 ? "Semua materi berhasil ditambahkan." : "Materi berhasil ditambahkan.");
     } else {
       setToast("Materi gagal ditambahkan. Coba pilih file yang lebih kecil.");
     }
@@ -167,7 +151,7 @@ function ManageMaterialPage({ role }) {
             onSubmit={setPendingAdd}
             onOpenUpload={() => setUploadTarget("add")}
             selectedFileName={addFileName}
-            selectedFile={addFile}
+            selectedFiles={addFiles}
             resetSignal={addResetSignal}
             loading={loading}
           />
@@ -178,6 +162,7 @@ function ManageMaterialPage({ role }) {
         isOpen={Boolean(uploadTarget)}
         onSelectFile={handleUploadSelect}
         onCancel={() => setUploadTarget(null)}
+        multiple={uploadTarget === "add"}
       />
 
       <EditMaterialDialog
@@ -194,7 +179,11 @@ function ManageMaterialPage({ role }) {
       <MaterialConfirmDialog
         isOpen={Boolean(pendingAdd)}
         title="Tambah Materi"
-        message="Apakah Anda yakin ingin menambahkan materi ini?"
+        message={
+          pendingAdd?.items?.length > 1
+            ? `Apakah Anda yakin ingin menambahkan ${pendingAdd.items.length} materi ini?`
+            : "Apakah Anda yakin ingin menambahkan materi ini?"
+        }
         confirmLabel={loading ? "Menambahkan..." : "Tambah"}
         onConfirm={confirmAdd}
         onCancel={() => setPendingAdd(null)}

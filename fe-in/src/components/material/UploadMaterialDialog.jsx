@@ -1,24 +1,30 @@
 import { useRef } from "react";
 import "./UploadMaterialDialog.css";
 
-function UploadMaterialDialog({ isOpen, onSelectFile, onCancel }) {
+function UploadMaterialDialog({ isOpen, onSelectFile, onCancel, multiple = false }) {
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
   function handleFileChange(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      onSelectFile({
+    if (multiple) {
+      onSelectFile(files.map((file) => ({
+        file,
         fileName: file.name,
         fileType: file.type,
-        fileData: reader.result,
-      });
-    };
-    reader.readAsDataURL(file);
+      })));
+      return;
+    }
+
+    const file = files[0];
+    onSelectFile({
+      file,
+      fileName: file.name,
+      fileType: file.type,
+    });
   }
 
   return (
@@ -28,6 +34,7 @@ function UploadMaterialDialog({ isOpen, onSelectFile, onCancel }) {
         <input
           ref={fileInputRef}
           type="file"
+          multiple={multiple}
           className="upload-material-input"
           onChange={handleFileChange}
         />

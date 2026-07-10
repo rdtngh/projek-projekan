@@ -3,8 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MaterialRequest;
 use App\Models\Material;
+use App\Models\MaterialFile;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialController extends Controller
 {
@@ -23,6 +29,145 @@ class MaterialController extends Controller
         return response()->json([
             'success' => true,
             'data' => $material->files()->get(),
+        ]);
+    }
+
+    public function store(MaterialRequest $request): JsonResponse
+    {
+        $orderNumber = $request->order_number ?? ((Material::where('training_id', $request->training_id)->max('order_number') ?? 0) + 1);
+
+        $material = Material::create([
+            'training_id' => $request->training_id,
+            'title' => $request->title,
+            'description' => $request->description ?? null,
+            'speaker' => $request->speaker ?? '',
+            'order_number' => $orderNumber,
+        ]);
+
+        $this->storeFiles($request, $material);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materi berhasil ditambahkan.',
+            'data' => $material->load('files'),
+        ], 201);
+    }
+
+    public function bulkStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'training_id' => ['required', 'integer', 'exists:trainings,id'],
+            'titles' => ['required', 'array', 'min:1'],
+            'titles.*' => ['required', 'string', 'max:255'],
+            'files' => ['required', 'array', 'min:1'],
+            'files.*' => ['file', 'max:51200'],
+        ]);
+
+        $files = $request->file('files') ?? [];
+
+        if (count($validated['titles']) !== count($files)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jumlah judul materi harus sama dengan jumlah file.',
+            ], 422);
+        }
+
+        $materials = DB::transaction(function () use ($validated, $files) {
+            $orderNumber = (Material::where('training_id', $validated['training_id'])->max('order_number') ?? 0) + 1;
+            $createdMaterials = [];
+
+            foreach ($files as $index => $file) {
+                $material = Material::create([
+                    'training_id' => $validated['training_id'],
+                    'title' => $validated['titles'][$index],
+                    'description' => null,
+                    'speaker' => '',
+                    'order_number' => $orderNumber + $index,
+                ]);
+
+                $this->storeUploadedFile($file, $material);
+                $createdMaterials[] = $material->load('files');
+            }
+
+            return $createdMaterials;
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materi berhasil ditambahkan.',
+            'data' => $materials,
+        ], 201);
+    }
+
+    public function update(MaterialRequest $request, Material $material): JsonResponse
+    {
+        $material->update([
+            'title' => $request->title,
+            'description' => $request->description ?? $material->description,
+            'speaker' => $request->speaker ?? $material->speaker,
+            'order_number' => $request->order_number ?? $material->order_number,
+        ]);
+
+        $this->storeFiles($request, $material);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materi berhasil diperbarui.',
+            'data' => $material->load('files'),
+        ]);
+    }
+
+    public function destroy(Material $material): JsonResponse
+    {
+        // delete files from storage
+        foreach ($material->files as $file) {
+            $url = $file->file_path; // e.g. /storage/materials/xxx
+            $relative = preg_replace('#^/storage/#', '', $url);
+            try {
+                Storage::disk('public')->delete($relative);
+            } catch (\Exception $e) {
+                // ignore
+            }
+            $file->delete();
+        }
+
+        $material->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materi berhasil dihapus.',
+        ]);
+    }
+
+    private function storeFiles(Request $request, Material $material): void
+    {
+        $files = $request->file('files') ?? $request->file('files[]');
+
+        if (empty($files)) {
+            return;
+        }
+
+        $files = is_array($files) ? $files : [$files];
+
+        foreach ($files as $file) {
+            if (!$file || !$file->isValid()) {
+                continue;
+            }
+
+            $this->storeUploadedFile($file, $material);
+        }
+    }
+
+    private function storeUploadedFile($file, Material $material): void
+    {
+        $filename = Str::random(12) . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
+        $path = $file->storeAs('materials', $filename, 'public');
+
+        MaterialFile::create([
+            'material_id' => $material->id,
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => Storage::disk('public')->url($path),
+            'file_type' => $file->getClientMimeType(),
         ]);
     }
 }

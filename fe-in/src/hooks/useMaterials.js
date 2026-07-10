@@ -21,7 +21,11 @@ export const useMaterials = () => {
     async (formData) => {
       setLoading(true);
       try {
-        await materialService.createMaterial(formData);
+        if (formData.items?.length > 1) {
+          await materialService.createMaterialsBulk(formData);
+        } else {
+          await materialService.createMaterial(formData);
+        }
         await loadMaterials();
         return true;
       } catch (error) {

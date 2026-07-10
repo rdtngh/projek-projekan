@@ -8,6 +8,7 @@ function EditMaterialDialog({
   onCancel,
   onOpenUpload,
   selectedFileName,
+  selectedFile,
   loading,
 }) {
   if (!isOpen || !material) return null;
@@ -22,6 +23,7 @@ function EditMaterialDialog({
           onSubmit={onSubmit}
           onOpenUpload={onOpenUpload}
           selectedFileName={selectedFileName}
+          selectedFile={selectedFile}
           loading={loading}
         />
         <button

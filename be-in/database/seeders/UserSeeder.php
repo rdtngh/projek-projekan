@@ -13,8 +13,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::insert([
-
+        $users = [
             [
                 'role_id' => 1,
                 'employee_number' => '000001',
@@ -24,8 +23,6 @@ class UserSeeder extends Seeder
                 'email' => 'superadmin@advent.local',
                 'password' => Hash::make('admin123'),
                 'remember_token' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
 
             [
@@ -37,8 +34,6 @@ class UserSeeder extends Seeder
                 'email' => 'admin@advent.local',
                 'password' => Hash::make('admin123'),
                 'remember_token' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
 
             [
@@ -50,8 +45,6 @@ class UserSeeder extends Seeder
                 'email' => 'budi@advent.local',
                 'password' => Hash::make('admin123'),
                 'remember_token' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
 
             [
@@ -63,8 +56,6 @@ class UserSeeder extends Seeder
                 'email' => 'siti@advent.local',
                 'password' => Hash::make('admin123'),
                 'remember_token' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
 
             [
@@ -76,10 +67,15 @@ class UserSeeder extends Seeder
                 'email' => 'andi@advent.local',
                 'password' => Hash::make('admin123'),
                 'remember_token' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
 
-        ]);
+        ];
+
+        foreach ($users as $user) {
+            User::updateOrCreate(
+                ['employee_number' => $user['employee_number']],
+                $user
+            );
+        }
     }
 }

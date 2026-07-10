@@ -1,114 +1,66 @@
-import { createCrudStorage } from "./crudStorage";
-import { deleteFile, getFile, saveFile } from "./fileStorage";
+import api from "./api";
 
-const materialStorage = createCrudStorage({
-  storageKey: "rsabl_materials",
-  initialData: [],
+const DEFAULT_TRAINING_ID = 1;
+
+const mapMaterialFromApi = (m) => ({
+  id: m.id,
+  title: m.title,
+  description: m.description,
+  speaker: m.speaker,
+  order_number: m.order_number,
+  files: m.files || [],
+  fileName: m.files?.[0]?.file_name || "",
+  fileType: m.files?.[0]?.file_type || "",
 });
 
-const buildFileStorageKey = (id) => `material-${id}`;
-
-const splitMaterialPayload = (materialData) => {
-  const { fileData, fileType, fileName, ...metadata } = materialData;
-
-  return {
-    metadata: {
-      ...metadata,
-      fileName,
-      fileType,
-    },
-    filePayload: fileData
-      ? {
-          fileData,
-          fileType,
-          fileName,
-        }
-      : null,
-  };
+export const getAllMaterials = async () => {
+  // fetch materials for default training
+  const res = await api.get(`/trainings/${DEFAULT_TRAINING_ID}/materials`);
+  return (res.data?.data || []).map(mapMaterialFromApi);
 };
 
-const mergeStoredFile = async (material) => {
-  if (!material.fileStorageKey) return material;
+export const createMaterial = async (materialData) => {
+  const fd = new FormData();
+  fd.append("title", materialData.title);
+  fd.append("training_id", materialData.training_id || DEFAULT_TRAINING_ID);
+  if (materialData.description) fd.append("description", materialData.description);
 
-  try {
-    const storedFile = await getFile(material.fileStorageKey);
-    return {
-      ...material,
-      fileData: storedFile?.fileData || "",
-      fileType: storedFile?.fileType || material.fileType || "",
-      fileName: storedFile?.fileName || material.fileName || "",
-    };
-  } catch (error) {
-    return {
-      ...material,
-      fileData: "",
-    };
+  if (materialData.file) {
+    fd.append("files[]", materialData.file, materialData.fileName || materialData.file.name);
   }
+
+  const res = await api.post("/materials", fd);
+  return mapMaterialFromApi(res.data.data);
 };
 
-export const getData = async () => {
-  const materials = materialStorage.getData();
-  return Promise.all(materials.map(mergeStoredFile));
-};
+export const createMaterialsBulk = async (materialData) => {
+  const fd = new FormData();
+  fd.append("training_id", materialData.training_id || DEFAULT_TRAINING_ID);
 
-export const saveData = async (data) => materialStorage.saveData(data);
-
-export const addItem = async (materialData) => {
-  const { metadata, filePayload } = splitMaterialPayload(materialData);
-  const createdMaterial = materialStorage.addItem({
-    ...metadata,
-    fileStorageKey: null,
+  materialData.items.forEach((item) => {
+    fd.append("titles[]", item.title);
+    fd.append("files[]", item.file, item.fileName || item.file.name);
   });
 
-  if (!filePayload) return createdMaterial;
-
-  const fileStorageKey = buildFileStorageKey(createdMaterial.id);
-  await saveFile(fileStorageKey, filePayload);
-
-  const updatedMaterial = materialStorage.updateItem(createdMaterial.id, {
-    ...createdMaterial,
-    fileStorageKey,
-  });
-
-  return {
-    ...updatedMaterial,
-    ...filePayload,
-  };
+  const res = await api.post("/materials/bulk", fd);
+  return (res.data?.data || []).map(mapMaterialFromApi);
 };
 
-export const updateItem = async (id, materialData) => {
-  const { metadata, filePayload } = splitMaterialPayload(materialData);
-  const currentMaterial = materialStorage.getData().find((item) => item.id === id);
-
-  if (!currentMaterial) {
-    throw new Error("Material not found");
+export const updateMaterial = async (id, materialData) => {
+  const fd = new FormData();
+  if (materialData.title) fd.append("title", materialData.title);
+  if (materialData.description) fd.append("description", materialData.description);
+  if (materialData.file) {
+    fd.append("files[]", materialData.file, materialData.fileName || materialData.file.name);
   }
 
-  let fileStorageKey = currentMaterial.fileStorageKey;
+  fd.append("_method", "PUT");
 
-  if (filePayload) {
-    fileStorageKey = fileStorageKey || buildFileStorageKey(id);
-    await saveFile(fileStorageKey, filePayload);
-  }
-
-  return materialStorage.updateItem(id, {
-    ...currentMaterial,
-    ...metadata,
-    fileStorageKey,
-  });
+  const res = await api.post(`/materials/${id}`, fd);
+  return mapMaterialFromApi(res.data.data);
 };
 
-export const deleteItem = async (id) => {
-  const currentMaterial = materialStorage.getData().find((item) => item.id === id);
-
-  if (currentMaterial?.fileStorageKey) {
-    await deleteFile(currentMaterial.fileStorageKey);
-  }
-
-  return materialStorage.deleteItem(id);
+export const deleteMaterial = async (id) => {
+  await api.delete(`/materials/${id}`);
+  return true;
 };
-
-export const getAllMaterials = getData;
-export const createMaterial = addItem;
-export const updateMaterial = updateItem;
-export const deleteMaterial = deleteItem;
