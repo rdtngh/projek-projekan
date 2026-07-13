@@ -10,6 +10,9 @@ import listIcon from "../../assets/icons/icon-daftar-materi.svg";
 import addIcon from "../../assets/icons/icon-tambahmateri.svg";
 import "./ManageMaterialPage.css";
 
+const createSelectionId = () =>
+  globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+
 function ManageMaterialPage({ role }) {
   const {
     materials,
@@ -57,7 +60,11 @@ function ManageMaterialPage({ role }) {
 
   function handleUploadSelect(file) {
     if (uploadTarget === "add") {
-      const files = Array.isArray(file) ? file : [file];
+      const files = (Array.isArray(file) ? file : [file]).map((selected) => ({
+        ...selected,
+        id: createSelectionId(),
+        title: "",
+      }));
       setAddFileName(files.length === 1 ? files[0].fileName : `${files.length} file dipilih`);
       setAddFiles(files);
     }

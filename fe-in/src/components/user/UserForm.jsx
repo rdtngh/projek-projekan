@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./UserForm.css";
 import addIcon from "../../assets/icons/icon-tambahpengguna.svg";
 
@@ -19,7 +19,7 @@ const departments = [
 
 const roles = ["Super Admin", "Admin", "Karyawan"];
 
-function UserForm({
+function UserFormContent({
   mode = "add",
   user,
   onSubmit,
@@ -27,23 +27,18 @@ function UserForm({
   submitLabel,
   disabled = false,
 }) {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(() =>
+    mode === "edit" && user
+      ? {
+          id: user.id,
+          user: user.user,
+          userId: user.userId,
+          department: user.department,
+          role: user.role,
+        }
+      : initialForm
+  );
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    if (mode === "edit" && user) {
-      setForm({
-        id: user.id,
-        user: user.user,
-        userId: user.userId,
-        department: user.department,
-        role: user.role,
-      });
-    } else {
-      setForm(initialForm);
-    }
-    setErrors({});
-  }, [mode, user]);
 
   function validate() {
     const nextErrors = {};
@@ -165,6 +160,11 @@ function UserForm({
       </div>
     </form>
   );
+}
+
+function UserForm(props) {
+  const formKey = `${props.mode ?? "add"}-${props.user?.id ?? "new"}`;
+  return <UserFormContent key={formKey} {...props} />;
 }
 
 export default UserForm;

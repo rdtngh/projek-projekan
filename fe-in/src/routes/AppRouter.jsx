@@ -6,6 +6,7 @@ import LoginPage from "../pages/public/LoginPage";
 
 // Employee
 import DashboardEmployee from "../pages/employee/DashboardEmployee";
+import EmployeeMaterials from "../pages/employee/EmployeeMaterials";
 
 // Admin
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
@@ -42,6 +43,11 @@ function AppRouter() {
         <Route
           path="/employee"
           element={<DashboardEmployee />}
+        />
+
+        <Route
+          path="/employee/materi"
+          element={<EmployeeMaterials />}
         />
 
 

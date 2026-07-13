@@ -11,7 +11,7 @@ export const useExam = () => {
   const [errors, setErrors] = useState({});
 
   // Validasi form
-  const validateQuestion = (formData) => {
+  const validateQuestion = useCallback((formData) => {
     const newErrors = {};
 
     if (!formData.question?.trim()) {
@@ -35,7 +35,14 @@ export const useExam = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, []);
+
+  // Reset form ke state awal
+  const resetForm = useCallback(() => {
+    setSelectedQuestion(null);
+    setIsEditing(false);
+    setErrors({});
+  }, []);
 
   // Load semua questions
   const loadQuestions = useCallback(async () => {
@@ -69,7 +76,7 @@ export const useExam = () => {
         setLoading(false);
       }
     },
-    [loadQuestions]
+    [loadQuestions, validateQuestion]
   );
 
   // Update question
@@ -92,7 +99,7 @@ export const useExam = () => {
         setLoading(false);
       }
     },
-    [loadQuestions]
+    [loadQuestions, resetForm, validateQuestion]
   );
 
   // Delete question
@@ -123,13 +130,6 @@ export const useExam = () => {
   const handleDelete = (id) => {
     setDeletingId(id);
     setShowDeleteDialog(true);
-  };
-
-  // Reset form ke state awal
-  const resetForm = () => {
-    setSelectedQuestion(null);
-    setIsEditing(false);
-    setErrors({});
   };
 
   // Close delete dialog

@@ -21,7 +21,7 @@ const readStorage = (storageKey, defaultData) => {
 
   try {
     return JSON.parse(storedValue);
-  } catch (error) {
+  } catch {
     window.localStorage.setItem(storageKey, JSON.stringify(defaultData));
     return cloneData(defaultData);
   }

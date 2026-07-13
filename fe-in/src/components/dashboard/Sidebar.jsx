@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./Sidebar.css";
 
 import iconHome from "../../assets/icons/icon-berandaputih.svg";
@@ -87,21 +87,16 @@ function Sidebar({ role = "superadmin" }) {
     item.children?.some((child) => location.pathname === child.to);
 
   const isItemActive = (item) =>
-    isBaseMenu(item)
+    item.to === "/employee/materi"
+      ? location.pathname === item.to || location.pathname.startsWith("/employee/material/")
+      : isBaseMenu(item)
       ? location.pathname === item.to
       : location.pathname === item.to || isChildActive(item);
-
-  useEffect(() => {
-    const activeParent = menu.find((item) => item.children && isItemActive(item));
-    if (!activeParent) return;
-
-    setExpandedMenus((prev) => ({ ...prev, [activeParent.to]: true }));
-  }, [location.pathname, menu]);
 
   const toggleSubmenu = (item) => {
     setExpandedMenus((prev) => ({
       ...prev,
-      [item.to]: !prev[item.to],
+      [item.to]: !(prev[item.to] ?? isItemActive(item)),
     }));
   };
 
@@ -110,7 +105,9 @@ function Sidebar({ role = "superadmin" }) {
       <nav className="sidebar-nav" aria-label="Sidebar navigation">
         {menu.map((item) => {
           const itemActive = isItemActive(item);
-          const expanded = Boolean(expandedMenus[item.to]);
+          const expanded = Boolean(
+            expandedMenus[item.to] ?? (item.children && itemActive)
+          );
 
           return (
           <div key={item.label} className="sidebar-menu-group">

@@ -1,62 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import "./ExamForm.css";
 import addQuestionIcon from "../../assets/icons/icon-tambahsoal.svg";
 
-function ExamForm({
+const emptyForm = {
+  question: "",
+  options: { a: "", b: "", c: "", d: "" },
+  correctAnswer: "",
+};
+
+function ExamFormContent({
   mode = "add",
   selectedQuestion,
   onSubmit,
   onCancel,
   errors = {},
   loading = false,
-  resetSignal = 0,
 }) {
   const questionInputRef = useRef(null);
-
-  const [form, setForm] = useState({
-    question: "",
-    options: {
-      a: "",
-      b: "",
-      c: "",
-      d: "",
-    },
-    correctAnswer: "",
-  });
-
   const isEditMode = mode === "edit";
+  const [form, setForm] = useState(() =>
+    isEditMode && selectedQuestion
+      ? {
+          question: selectedQuestion.question,
+          options: { ...selectedQuestion.options },
+          correctAnswer: selectedQuestion.correctAnswer,
+        }
+      : emptyForm
+  );
 
   const resetFormData = () => {
-    setForm({
-      question: "",
-      options: {
-        a: "",
-        b: "",
-        c: "",
-        d: "",
-      },
-      correctAnswer: "",
-    });
+    setForm(emptyForm);
   };
-
-  useEffect(() => {
-    if (isEditMode && selectedQuestion) {
-      setForm({
-        question: selectedQuestion.question,
-        options: { ...selectedQuestion.options },
-        correctAnswer: selectedQuestion.correctAnswer,
-      });
-    } else {
-      resetFormData();
-    }
-  }, [selectedQuestion, isEditMode]);
-
-  useEffect(() => {
-    if (!isEditMode && resetSignal !== 0) {
-      resetFormData();
-      questionInputRef.current?.focus();
-    }
-  }, [resetSignal, isEditMode]);
 
   const handleQuestionChange = (e) => {
     setForm((prev) => ({
@@ -126,6 +100,7 @@ return (
             <textarea
               id="question"
               ref={questionInputRef}
+              autoFocus={!isEditMode}
               rows={3}
               placeholder="Ketik soal di sini..."
               className={`exam-form-input exam-form-textarea ${
@@ -236,6 +211,14 @@ return (
       </div>
     </>
   );
+}
+
+function ExamForm(props) {
+  const formKey = `${props.mode ?? "add"}-${props.selectedQuestion?.id ?? "new"}-${
+    props.resetSignal ?? 0
+  }`;
+
+  return <ExamFormContent key={formKey} {...props} />;
 }
 
 export default ExamForm;

@@ -1,122 +1,46 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import uploadIcon from "../../assets/icons/icon-upload.svg";
 import "./MaterialForm.css";
 
-const initialForm = {
-  title: "",
-  fileName: "",
-  fileType: "",
-  file: null,
-  items: [],
-};
+const createEditForm = (material) => ({
+  id: material?.id,
+  title: material?.title ?? "",
+  fileName: material?.fileName ?? "",
+  fileType: material?.fileType ?? "",
+  file: material?.file ?? null,
+});
 
-const createItemId = () =>
-  globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
-
-function MaterialForm({
+function MaterialFormContent({
   mode = "add",
   material,
   onSubmit,
   onOpenUpload,
   selectedFileName,
   selectedFile,
-  selectedFiles,
+  selectedFiles = [],
   onSelectedFilesChange,
-  resetSignal = 0,
   loading = false,
 }) {
-  const [form, setForm] = useState(initialForm);
+  const [editForm, setEditForm] = useState(() => createEditForm(material));
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    if (mode === "edit" && material) {
-      setForm({
-        id: material.id,
-        title: material.title,
-        fileName: material.fileName,
-        fileType: material.fileType || "",
-        file: material.file || null,
-      });
-    } else {
-      setForm(initialForm);
-    }
-    setErrors({});
-  }, [mode, material]);
-
-  useEffect(() => {
-    if (selectedFileName === undefined) return;
-
-    setForm((prev) => ({ ...prev, fileName: selectedFileName }));
-  }, [selectedFileName]);
-
-  useEffect(() => {
-    if (mode !== "add" || !selectedFiles) return;
-
-    if (selectedFiles.length === 0) {
-      setForm((prev) => ({
-        ...prev,
-        fileName: "",
-        fileType: "",
-        file: null,
-        items: [],
-      }));
-      return;
-    }
-
-    setForm((prev) => {
-      const items = selectedFiles.map((selected) => {
-        const existingItem = prev.items.find((item) => item.file === selected.file);
-
-        return existingItem ?? {
-          id: createItemId(),
-          file: selected.file,
-          fileName: selected.fileName,
-          fileType: selected.fileType,
-          title: "",
-        };
-      });
-
-      return {
-        ...prev,
-        file: null,
-        fileName: items.length === 1 ? items[0].fileName : `${items.length} file dipilih`,
-        fileType: "",
-        items,
-      };
-    });
-  }, [mode, selectedFiles]);
-
-  useEffect(() => {
-    if (mode !== "edit" || !selectedFile) return;
-
-    setForm((prev) => ({
-      ...prev,
-      file: selectedFile.file,
-      fileName: selectedFile.fileName,
-      fileType: selectedFile.fileType,
-      items: [],
-    }));
-  }, [mode, selectedFile]);
-
-  useEffect(() => {
-    if (mode !== "add" || resetSignal === 0) return;
-
-    setForm(initialForm);
-    setErrors({});
-  }, [mode, resetSignal]);
+  const isAddMode = mode === "add";
+  const items = isAddMode ? selectedFiles : [];
+  const fileName = isAddMode
+    ? selectedFileName ?? ""
+    : selectedFileName ?? editForm.fileName;
 
   function validate() {
     const nextErrors = {};
 
-    if (!form.fileName) nextErrors.fileName = "Upload File Materi wajib diisi";
+    if (!fileName) nextErrors.fileName = "Upload File Materi wajib diisi";
 
-    if (mode === "add") {
+    if (isAddMode) {
       const itemTitles = {};
-      form.items.forEach((item) => {
-        if (!item.title.trim()) itemTitles[item.id] = "Judul Materi wajib diisi";
+      items.forEach((item) => {
+        if (!item.title?.trim()) itemTitles[item.id] = "Judul Materi wajib diisi";
       });
       if (Object.keys(itemTitles).length > 0) nextErrors.itemTitles = itemTitles;
-    } else if (!form.title.trim()) {
+    } else if (!editForm.title.trim()) {
       nextErrors.title = "Judul Materi wajib diisi";
     }
 
@@ -126,57 +50,20 @@ function MaterialForm({
 
   function removeSelectedFile(indexToRemove = 0) {
     setErrors({});
-
-    const currentItems = form.items;
-    const nextItems = currentItems.filter((_, index) => index !== indexToRemove);
-
     onSelectedFilesChange?.(
-      nextItems.map(({ file, fileName, fileType }) => ({
-        file,
-        fileName,
-        fileType,
-      }))
+      items.filter((_, index) => index !== indexToRemove)
     );
-
-    if (nextItems.length === 0) {
-      setForm((prev) => ({
-        ...prev,
-        fileName: "",
-        fileType: "",
-        file: null,
-        items: [],
-      }));
-      return;
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      file: null,
-      fileName: nextItems.length === 1 ? nextItems[0].fileName : `${nextItems.length} file dipilih`,
-      fileType: "",
-      items: nextItems,
-    }));
   }
 
   function clearSelectedFiles() {
     setErrors({});
     onSelectedFilesChange?.([]);
-    setForm((prev) => ({
-      ...prev,
-      fileName: "",
-      fileType: "",
-      file: null,
-      items: [],
-    }));
   }
 
   function updateItemTitle(id, title) {
-    setForm((prev) => ({
-      ...prev,
-      items: prev.items.map((item) =>
-        item.id === id ? { ...item, title } : item
-      ),
-    }));
+    onSelectedFilesChange?.(
+      items.map((item) => (item.id === id ? { ...item, title } : item))
+    );
     setErrors((prev) => {
       if (!prev.itemTitles?.[id]) return prev;
 
@@ -186,21 +73,28 @@ function MaterialForm({
     });
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  function handleSubmit(event) {
+    event.preventDefault();
     if (!validate()) return;
-    if (mode === "add" && form.items.length > 1) {
-      onSubmit({ items: form.items });
+
+    if (isAddMode && items.length > 1) {
+      onSubmit({ items });
       return;
     }
 
-    if (mode === "add") {
-      const [item] = form.items;
-      onSubmit({ ...form, ...item, items: [] });
+    if (isAddMode) {
+      const [item] = items;
+      onSubmit({ ...item, items: [] });
       return;
     }
 
-    onSubmit(form);
+    onSubmit({
+      ...editForm,
+      file: selectedFile?.file ?? editForm.file,
+      fileName,
+      fileType: selectedFile?.fileType ?? editForm.fileType,
+      items: [],
+    });
   }
 
   return (
@@ -212,12 +106,12 @@ function MaterialForm({
         <div className="material-upload-row">
           <input
             id={`${mode}-material-file`}
-            value={form.fileName}
+            value={fileName}
             readOnly
             className={`material-form-input ${errors.fileName ? "error" : ""}`}
             placeholder=""
           />
-          {form.items.length > 1 && mode === "add" && (
+          {items.length > 1 && isAddMode && (
             <button
               type="button"
               className="material-clear-file-btn"
@@ -242,29 +136,31 @@ function MaterialForm({
         )}
       </div>
 
-      {mode === "edit" && (
-      <div className="material-form-group">
-        <label htmlFor={`${mode}-material-title`} className="material-form-label">
-          Judul Materi
-        </label>
-        <input
-          id={`${mode}-material-title`}
-          value={form.title}
-          onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-          className={`material-form-input ${errors.title ? "error" : ""}`}
-          disabled={loading}
-        />
-        {errors.title && (
-          <span className="material-form-error">{errors.title}</span>
-        )}
-      </div>
+      {!isAddMode && (
+        <div className="material-form-group">
+          <label htmlFor={`${mode}-material-title`} className="material-form-label">
+            Judul Materi
+          </label>
+          <input
+            id={`${mode}-material-title`}
+            value={editForm.title}
+            onChange={(event) =>
+              setEditForm((prev) => ({ ...prev, title: event.target.value }))
+            }
+            className={`material-form-input ${errors.title ? "error" : ""}`}
+            disabled={loading}
+          />
+          {errors.title && (
+            <span className="material-form-error">{errors.title}</span>
+          )}
+        </div>
       )}
 
-      {mode === "add" && form.items.length > 0 && (
+      {isAddMode && items.length > 0 && (
         <div className="material-form-group">
           <span className="material-form-label">File Materi Dipilih</span>
           <div className="material-bulk-list">
-            {form.items.map((item, index) => (
+            {items.map((item, index) => (
               <div className="material-bulk-item" key={item.id}>
                 <span className="material-bulk-index">{index + 1}</span>
                 <div className="material-bulk-fields">
@@ -279,18 +175,25 @@ function MaterialForm({
                       Hapus
                     </button>
                   </div>
-                  <label className="material-bulk-title-label" htmlFor={`${mode}-material-title-${item.id}`}>
+                  <label
+                    className="material-bulk-title-label"
+                    htmlFor={`${mode}-material-title-${item.id}`}
+                  >
                     Judul Materi
                   </label>
                   <input
                     id={`${mode}-material-title-${item.id}`}
                     value={item.title}
-                    onChange={(e) => updateItemTitle(item.id, e.target.value)}
-                    className={`material-form-input ${errors.itemTitles?.[item.id] ? "error" : ""}`}
+                    onChange={(event) => updateItemTitle(item.id, event.target.value)}
+                    className={`material-form-input ${
+                      errors.itemTitles?.[item.id] ? "error" : ""
+                    }`}
                     disabled={loading}
                   />
                   {errors.itemTitles?.[item.id] && (
-                    <span className="material-form-error">{errors.itemTitles[item.id]}</span>
+                    <span className="material-form-error">
+                      {errors.itemTitles[item.id]}
+                    </span>
                   )}
                 </div>
               </div>
@@ -300,10 +203,20 @@ function MaterialForm({
       )}
 
       <button type="submit" className="material-submit-btn" disabled={loading}>
-        {mode === "edit" ? "Simpan" : `+ Tambah Materi${form.items.length > 1 ? ` (${form.items.length})` : ""}`}
+        {isAddMode
+          ? `+ Tambah Materi${items.length > 1 ? ` (${items.length})` : ""}`
+          : "Simpan"}
       </button>
     </form>
   );
+}
+
+function MaterialForm(props) {
+  const formKey = `${props.mode ?? "add"}-${props.material?.id ?? "new"}-${
+    props.resetSignal ?? 0
+  }`;
+
+  return <MaterialFormContent key={formKey} {...props} />;
 }
 
 export default MaterialForm;
