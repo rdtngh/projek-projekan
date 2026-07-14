@@ -163,7 +163,7 @@
     font-size: clamp(16px, 4.5vw, 20px);
   }
 
-  .pretest-required-dialog { left: calc(76px + (100vw - 76px) / 2); }
+  .pretest-required-dialog { left: 50%; }
 
 }
 

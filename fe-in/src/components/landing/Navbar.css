@@ -28,6 +28,10 @@
   min-width: 0;
 }
 
+.navbar-menu-toggle {
+  display: none;
+}
+
 /* ==========================
    LOGO
 ========================== */
@@ -96,4 +100,82 @@
 
 .login-btn:hover {
   background: #285f2c;
+}
+
+@media (max-width: 760px) {
+  .navbar {
+    min-height: 72px;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 0 0 22px 22px;
+  }
+
+  .navbar-left {
+    gap: 8px;
+  }
+
+  .navbar-menu-toggle {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    flex: 0 0 40px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 10px;
+    background: #327537;
+  }
+
+  .navbar-menu-toggle span {
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: #ffffff;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .navbar-menu-toggle.is-open span:first-child {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .navbar-menu-toggle.is-open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar-menu-toggle.is-open span:last-child {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .navbar-logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .navbar-title h1 {
+    font-size: clamp(0.78rem, 3.5vw, 1rem);
+  }
+
+  .navbar-title h2 {
+    font-size: clamp(0.68rem, 3vw, 0.88rem);
+  }
+
+  .login-btn {
+    min-width: 76px;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar-title h1,
+  .navbar-title h2 {
+    white-space: normal;
+  }
+
+  .navbar-logo {
+    width: 44px;
+    height: 44px;
+  }
 }

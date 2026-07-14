@@ -17,12 +17,12 @@ function UserTable({ users, onEdit, onDelete }) {
         <tbody>
           {users.map((user, idx) => (
             <tr key={user.id} className={user.role === "Super Admin" ? "row-super" : ""}>
-              <td>{idx + 1}</td>
-              <td>{user.user}</td>
-              <td>{user.userId}</td>
-              <td>{user.department}</td>
-              <td>{user.role}</td>
-              <td>
+              <td data-label="No">{idx + 1}</td>
+              <td data-label="User">{user.user}</td>
+              <td data-label="ID">{user.userId}</td>
+              <td data-label="Departemen">{user.department}</td>
+              <td data-label="Role">{user.role}</td>
+              <td data-label="Aksi">
                 <div className="user-table-actions">
                   <button className="btn-edit" type="button" onClick={() => onEdit(user)}>
                     Edit

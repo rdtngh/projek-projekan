@@ -56,3 +56,43 @@
   border-radius: 6px;
   cursor: pointer;
 }
+
+@media (max-width: 600px) {
+  .user-table-wrap {
+    overflow: visible;
+  }
+
+  .user-table,
+  .user-table tbody,
+  .user-table tr,
+  .user-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .user-table thead {
+    display: none;
+  }
+
+  .user-table tr {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+
+  .user-table td {
+    display: grid;
+    grid-template-columns: minmax(88px, 36%) minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 0;
+    overflow-wrap: anywhere;
+  }
+
+  .user-table td::before {
+    content: attr(data-label);
+    color: #1f2937;
+    font-weight: 700;
+  }
+}

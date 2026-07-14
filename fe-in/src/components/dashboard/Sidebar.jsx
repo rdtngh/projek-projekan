@@ -83,7 +83,7 @@ const menuByRole = {
   ],
 };
 
-function Sidebar({ role = "superadmin" }) {
+function Sidebar({ role = "superadmin", isOpen = false, onNavigate }) {
   const menu = menuByRole[role] || menuByRole.superadmin;
   const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState({});
@@ -116,7 +116,7 @@ function Sidebar({ role = "superadmin" }) {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${isOpen ? " is-open" : ""}`}>
       <nav className="sidebar-nav" aria-label="Sidebar navigation">
         {menu.map((item) => {
           const itemActive = isItemActive(item);
@@ -134,6 +134,7 @@ function Sidebar({ role = "superadmin" }) {
                   item.children ? " has-submenu" : ""
                 }`
               }
+              onClick={onNavigate}
             >
               {() => (
                 <>
@@ -168,6 +169,7 @@ function Sidebar({ role = "superadmin" }) {
                     className={({ isActive }) =>
                       `sidebar-submenu-link${isActive ? " active" : ""}`
                     }
+                    onClick={onNavigate}
                   >
                     {child.label}
                   </NavLink>

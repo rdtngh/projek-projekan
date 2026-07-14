@@ -7,10 +7,26 @@ function Navbar({
   buttonText = "LOG IN",
   buttonLink = "/login",
   showButton = true,
+  showMenuButton = false,
+  isMenuOpen = false,
+  onMenuToggle,
 }) {
   return (
     <header className="navbar">
       <div className="navbar-left">
+        {showMenuButton ? (
+          <button
+            type="button"
+            className={`navbar-menu-toggle${isMenuOpen ? " is-open" : ""}`}
+            aria-label={`${isMenuOpen ? "Tutup" : "Buka"} menu navigasi`}
+            aria-expanded={isMenuOpen}
+            onClick={onMenuToggle}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        ) : null}
         <img
           src={logo}
           alt="Logo RS Advent"

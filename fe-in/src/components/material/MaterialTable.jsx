@@ -20,8 +20,8 @@ function MaterialTable({ materials, onOpen, onEdit, onDelete }) {
           ) : (
             materials.map((material) => (
               <tr key={material.id}>
-                <td>{material.title}</td>
-                <td>
+                <td data-label="Judul Materi">{material.title}</td>
+                <td data-label="Aksi">
                   <div className="material-table-actions">
                     <button
                       type="button"
