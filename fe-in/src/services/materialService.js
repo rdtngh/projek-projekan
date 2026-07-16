@@ -2,27 +2,6 @@ import api from "./api";
 
 const DEFAULT_TRAINING_ID = 1;
 
-const employeeMaterialResponse = {
-  training: {
-    id: 1,
-    title: "Pelatihan Keselamatan Pasien",
-    pre_test_completed: false,
-    post_test_unlocked: false,
-  },
-  materials: [
-    { id: 1, title: "Materi 1", completed: true },
-    { id: 2, title: "Materi 2", completed: true },
-    { id: 3, title: "Materi 3", completed: false },
-    { id: 4, title: "Materi 4", completed: false },
-    { id: 5, title: "Materi 5", completed: false },
-    { id: 6, title: "Materi 6", completed: true },
-    { id: 7, title: "Materi 7", completed: true },
-    { id: 8, title: "Materi 8", completed: false },
-    { id: 9, title: "Materi 9", completed: false },
-    { id: 10, title: "Materi 10", completed: false },
-  ],
-};
-
 const resolveBackendUrl = (path) => {
   if (!path || /^https?:\/\//i.test(path)) return path;
 
@@ -43,6 +22,7 @@ const mapMaterialFromApi = (m) => ({
   })),
   fileName: m.files?.[0]?.file_name || "",
   fileType: m.files?.[0]?.file_type || "",
+  completed: Boolean(m.completed),
 });
 
 export const getAllMaterials = async () => {
@@ -51,11 +31,25 @@ export const getAllMaterials = async () => {
   return (res.data?.data || []).map(mapMaterialFromApi);
 };
 
-// Kontrak Employee. Ganti isi fungsi ini dengan request API saat endpoint progress siap.
-export const getMaterials = async () => ({
-  training: { ...employeeMaterialResponse.training },
-  materials: employeeMaterialResponse.materials.map((material) => ({ ...material })),
+const mapMaterialProgressFromApi = (data) => ({
+  training: data.training,
+  materials: (data.materials || []).map(mapMaterialFromApi),
 });
+
+export const getMaterials = async () => {
+  const res = await api.get(`/trainings/${DEFAULT_TRAINING_ID}/materials/progress`);
+  return mapMaterialProgressFromApi(res.data?.data || {});
+};
+
+export const markMaterialsAccessed = async (trainingId = DEFAULT_TRAINING_ID) => {
+  const res = await api.post(`/trainings/${trainingId}/materials/access`);
+  return mapMaterialProgressFromApi(res.data?.data || {});
+};
+
+export const getMaterialProgress = async (trainingId = DEFAULT_TRAINING_ID) => {
+  const res = await api.get(`/trainings/${trainingId}/materials/progress`);
+  return mapMaterialProgressFromApi(res.data?.data || {});
+};
 
 export const createMaterial = async (materialData) => {
   const fd = new FormData();

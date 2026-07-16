@@ -140,8 +140,8 @@ function EmployeePostTest() {
       {!loading && data && !data.materials_completed && (
         <div className="posttest-locked-overlay">
           <section className="posttest-locked-dialog" role="alertdialog" aria-modal="true">
-            <h2>Anda belum menyelesaikan semua Materi.</h2>
-            <p>Selesaikan semua materi untuk memulai Post-Test!</p>
+            <h2>Anda belum Mengakses Materi.</h2>
+            <p>Akses Materi Untuk membuka Post-Test!</p>
           </section>
         </div>
       )}

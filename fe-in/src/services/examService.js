@@ -1,7 +1,9 @@
 import api from "./api";
+import { getMaterialProgress } from "./materialService";
 
 const DEFAULT_PRE_TEST_ID = import.meta.env.VITE_PRE_TEST_ID || "1";
 const DEFAULT_POST_TEST_ID = import.meta.env.VITE_POST_TEST_ID || "2";
+const DEFAULT_TRAINING_ID = import.meta.env.VITE_TRAINING_ID || "1";
 
 const unwrap = (response) => response.data?.data ?? response.data;
 
@@ -112,14 +114,44 @@ export const submitPreTest = async (payload) =>
   submitTest(payload?.test_id ?? DEFAULT_PRE_TEST_ID, payload);
 
 export const getPostTest = async () => {
+  const materialProgress = await getMaterialProgress(DEFAULT_TRAINING_ID);
+  const progressTraining = materialProgress.training ?? {
+    id: DEFAULT_TRAINING_ID,
+    title: "Post-Test",
+    post_test_unlocked: false,
+  };
+
+  if (!progressTraining.post_test_unlocked) {
+    return {
+      training: progressTraining,
+      materials_completed: false,
+      post_test: {
+        id: DEFAULT_POST_TEST_ID,
+        status: "LOCKED",
+        attempt: 0,
+        max_attempt: 1,
+        can_retry: false,
+        certificate_available: false,
+        passing_grade: 0,
+        score: 0,
+        correct: 0,
+        wrong: 0,
+        percentage: 0,
+        passed: false,
+      },
+      questions: [],
+    };
+  }
+
   const data = await getTestWithQuestions(DEFAULT_POST_TEST_ID);
+  const training = progressTraining ?? data.test.training ?? {
+    id: data.test.training_id,
+    title: data.test.training?.title ?? "Post-Test",
+  };
 
   return {
-    training: data.test.training ?? {
-      id: data.test.training_id,
-      title: data.test.training?.title ?? "Post-Test",
-    },
-    materials_completed: true,
+    training,
+    materials_completed: Boolean(training.post_test_unlocked),
     post_test: {
       id: data.test.id,
       status: "NOT_STARTED",

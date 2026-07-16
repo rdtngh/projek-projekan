@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import MaterialListCard from "../../components/employee/MaterialListCard";
 import PreTestRequiredDialog from "../../components/employee/PreTestRequiredDialog";
@@ -10,8 +11,25 @@ function EmployeeMaterials() {
     training: null,
     materials: [],
   });
+  const [accessMarked, setAccessMarked] = useState(false);
 
   const preTestCompleted = Boolean(data.training?.pre_test_completed);
+
+  useEffect(() => {
+    if (loading || !preTestCompleted || accessMarked || !data.training?.id) return;
+
+    let active = true;
+
+    materialService
+      .markMaterialsAccessed(data.training.id)
+      .finally(() => {
+        if (active) setAccessMarked(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [accessMarked, data.training?.id, loading, preTestCompleted]);
 
   return (
     <DashboardLayout role="employee">

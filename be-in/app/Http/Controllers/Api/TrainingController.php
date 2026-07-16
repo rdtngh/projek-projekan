@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\TestResult;
 use App\Models\Training;
+use App\Models\UserMaterial;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class TrainingController extends Controller
 {
@@ -45,5 +48,78 @@ class TrainingController extends Controller
             'success' => true,
             'data' => $materials,
         ]);
+    }
+
+    public function materialProgress(Request $request, Training $training): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $this->buildMaterialProgress($request, $training),
+        ]);
+    }
+
+    public function markMaterialsAccessed(Request $request, Training $training): JsonResponse
+    {
+        $materials = $training->materials()->select('id')->get();
+
+        foreach ($materials as $material) {
+            UserMaterial::updateOrCreate(
+                [
+                    'user_id' => $request->user()->id,
+                    'material_id' => $material->id,
+                ],
+                [
+                    'is_completed' => true,
+                    'completed_at' => now(),
+                ]
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Akses materi berhasil dicatat.',
+            'data' => $this->buildMaterialProgress($request, $training),
+        ]);
+    }
+
+    private function buildMaterialProgress(Request $request, Training $training): array
+    {
+        $user = $request->user();
+        $materials = $training->materials()
+            ->with('files')
+            ->orderBy('order_number')
+            ->get();
+
+        $completedMaterialIds = UserMaterial::query()
+            ->where('user_id', $user->id)
+            ->whereIn('material_id', $materials->pluck('id'))
+            ->where('is_completed', true)
+            ->pluck('material_id')
+            ->all();
+
+        $preTestId = $training->tests()
+            ->where('type', 'pretest')
+            ->value('id');
+
+        $preTestCompleted = $preTestId
+            ? TestResult::where('user_id', $user->id)->where('test_id', $preTestId)->exists()
+            : false;
+
+        $completedLookup = array_flip($completedMaterialIds);
+        $materialsWithProgress = $materials->map(function ($material) use ($completedLookup) {
+            $material->setAttribute('completed', array_key_exists($material->id, $completedLookup));
+
+            return $material;
+        });
+
+        return [
+            'training' => [
+                'id' => $training->id,
+                'title' => $training->title,
+                'pre_test_completed' => $preTestCompleted,
+                'post_test_unlocked' => $materials->isNotEmpty() && count($completedMaterialIds) >= $materials->count(),
+            ],
+            'materials' => $materialsWithProgress,
+        ];
     }
 }
