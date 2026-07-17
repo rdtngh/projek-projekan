@@ -3,7 +3,15 @@ import { normalizeRole } from "../utils/role";
 
 export { normalizeRole };
 
+export const clearSession = () => {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("authUser");
+  delete api.defaults.headers.common.Authorization;
+};
+
 export const login = async ({ employeeNumber, password }) => {
+  clearSession();
+
   const response = await api.post("/login", {
     employee_number: employeeNumber,
     password,
@@ -33,9 +41,7 @@ export const logout = async () => {
   try {
     await api.post("/logout");
   } finally {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("authUser");
-    delete api.defaults.headers.common.Authorization;
+    clearSession();
   }
 };
 

@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import materialListIcon from "../../assets/icons/icon-daftar-materi.svg";
 import completedIcon from "../../assets/icons/icon-listceklis.svg";
 
@@ -23,6 +22,7 @@ function MaterialStatus({ completed }) {
 }
 
 function MaterialRow({ material, disabled }) {
+  const file = material.files?.[0];
   const content = (
     <>
       <span className="employee-material-title">{material.title}</span>
@@ -30,7 +30,7 @@ function MaterialRow({ material, disabled }) {
     </>
   );
 
-  if (disabled) {
+  if (disabled || !file?.file_path) {
     return (
       <div
         className="employee-material-row is-disabled"
@@ -42,13 +42,15 @@ function MaterialRow({ material, disabled }) {
   }
 
   return (
-    <Link
+    <a
       className="employee-material-row"
-      to={`/employee/material/${material.id}`}
+      href={file.file_path}
+      target="_blank"
+      rel="noreferrer"
       aria-label={`Buka ${material.title}`}
     >
       {content}
-    </Link>
+    </a>
   );
 }
 

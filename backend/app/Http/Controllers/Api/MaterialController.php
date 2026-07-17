@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MaterialRequest;
 use App\Models\Material;
 use App\Models\MaterialFile;
+use App\Models\TestResult;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -16,6 +17,13 @@ class MaterialController extends Controller
 {
     public function show(Material $material): JsonResponse
     {
+        if ($this->requiresPreTest($material)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pre-Test harus dikerjakan sebelum membuka materi.',
+            ], 403);
+        }
+
         $material->load(['training', 'files']);
 
         return response()->json([
@@ -26,6 +34,13 @@ class MaterialController extends Controller
 
     public function files(Material $material): JsonResponse
     {
+        if ($this->requiresPreTest($material)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pre-Test harus dikerjakan sebelum membuka materi.',
+            ], 403);
+        }
+
         return response()->json([
             'success' => true,
             'data' => $material->files()->get(),
@@ -169,5 +184,22 @@ class MaterialController extends Controller
             'file_path' => Storage::disk('public')->url($path),
             'file_type' => $file->getClientMimeType(),
         ]);
+    }
+
+    private function requiresPreTest(Material $material): bool
+    {
+        $user = request()->user();
+
+        if (strtolower($user?->role?->name ?? '') !== 'karyawan') {
+            return false;
+        }
+
+        $preTestId = $material->training
+            ? $material->training->tests()->where('type', 'pretest')->value('id')
+            : null;
+
+        return $preTestId
+            ? ! TestResult::where('user_id', $user->id)->where('test_id', $preTestId)->exists()
+            : true;
     }
 }

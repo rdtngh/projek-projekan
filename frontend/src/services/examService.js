@@ -83,6 +83,30 @@ const getTestWithQuestions = async (testId) => {
   };
 };
 
+const getTrainingTest = async (type, fallbackTestId) => {
+  try {
+    const response = await api.get(`/trainings/${DEFAULT_TRAINING_ID}/tests/${type}`);
+    return unwrap(response);
+  } catch (error) {
+    if (error.response?.status === 404) {
+      const fallback = await api.get(`/tests/${fallbackTestId}`);
+      return unwrap(fallback);
+    }
+
+    throw error;
+  }
+};
+
+const getTrainingTestWithQuestions = async (type, fallbackTestId) => {
+  const test = mapTest(await getTrainingTest(type, fallbackTestId));
+  const questionsResponse = await api.get(`/tests/${test.id}/questions`);
+
+  return {
+    test,
+    questions: mapQuestions(unwrap(questionsResponse)).map(hideCorrectAnswer),
+  };
+};
+
 const submitTest = async (testId, payload) => {
   const response = await api.post(`/tests/${testId}/submit`, {
     answers: (payload?.answers ?? []).map((answer) => ({
@@ -108,7 +132,8 @@ const submitTest = async (testId, payload) => {
   };
 };
 
-export const getPreTest = async () => getTestWithQuestions(DEFAULT_PRE_TEST_ID);
+export const getPreTest = async () =>
+  getTrainingTestWithQuestions("pretest", DEFAULT_PRE_TEST_ID);
 
 export const submitPreTest = async (payload) =>
   submitTest(payload?.test_id ?? DEFAULT_PRE_TEST_ID, payload);
@@ -143,7 +168,7 @@ export const getPostTest = async () => {
     };
   }
 
-  const data = await getTestWithQuestions(DEFAULT_POST_TEST_ID);
+  const data = await getTrainingTestWithQuestions("posttest", DEFAULT_POST_TEST_ID);
   const training = progressTraining ?? data.test.training ?? {
     id: data.test.training_id,
     title: data.test.training?.title ?? "Post-Test",

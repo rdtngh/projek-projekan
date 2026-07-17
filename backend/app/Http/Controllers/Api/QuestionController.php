@@ -93,7 +93,7 @@ class QuestionController extends Controller
         return Test::firstOrCreate(
             [
                 'training_id' => $training->id,
-                'type' => 'posttest',
+                'type' => 'pretest',
             ],
             [
                 'duration' => 30,

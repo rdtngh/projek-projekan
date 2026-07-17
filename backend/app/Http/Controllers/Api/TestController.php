@@ -7,8 +7,11 @@ use App\Http\Requests\SubmitTestRequest;
 use App\Models\Certificate;
 use App\Models\Test;
 use App\Models\TestResult;
+use App\Models\Training;
 use App\Models\UserAnswer;
+use App\Models\UserMaterial;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -16,7 +19,38 @@ class TestController extends Controller
 {
     public function show(Test $test): JsonResponse
     {
+        if (! $this->canAccessTest($test)) {
+            return $this->lockedResponse();
+        }
+
         $test->load('training');
+
+        return response()->json([
+            'success' => true,
+            'data' => $test,
+        ]);
+    }
+
+    public function showByType(Training $training, string $type): JsonResponse
+    {
+        abort_unless(in_array($type, ['pretest', 'posttest'], true), 404);
+
+        $test = Test::firstOrCreate(
+            [
+                'training_id' => $training->id,
+                'type' => $type,
+            ],
+            [
+                'duration' => 30,
+                'passing_score' => 70,
+            ]
+        );
+
+        $test->load('training');
+
+        if (! $this->canAccessTest($test)) {
+            return $this->lockedResponse();
+        }
 
         return response()->json([
             'success' => true,
@@ -26,6 +60,10 @@ class TestController extends Controller
 
     public function questions(Test $test): JsonResponse
     {
+        if (! $this->canAccessTest($test)) {
+            return $this->lockedResponse();
+        }
+
         $questions = $test->questions()
             ->select('id', 'test_id', 'question', 'option_a', 'option_b', 'option_c', 'option_d', 'order_number')
             ->orderBy('order_number')
@@ -33,12 +71,16 @@ class TestController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $questions,
+            'data' => $this->shuffleQuestionsForUser($questions, $test),
         ]);
     }
 
     public function submit(SubmitTestRequest $request, Test $test): JsonResponse
     {
+        if (! $this->canAccessTest($test)) {
+            return $this->lockedResponse();
+        }
+
         $user = $request->user();
         $answers = collect($request->answers)->keyBy('question_id');
         $questions = $test->questions()->select('id', 'correct_answer')->get();
@@ -115,5 +157,64 @@ class TestController extends Controller
                 'test_result_id' => $testResult->id,
             ],
         ]);
+    }
+
+    private function canAccessTest(Test $test): bool
+    {
+        if ($test->type === 'pretest') {
+            return true;
+        }
+
+        if ($test->type !== 'posttest') {
+            return false;
+        }
+
+        return $this->hasCompletedPreTest($test) && $this->hasCompletedMaterials($test);
+    }
+
+    private function hasCompletedPreTest(Test $test): bool
+    {
+        $preTestId = Test::where('training_id', $test->training_id)
+            ->where('type', 'pretest')
+            ->value('id');
+
+        return $preTestId
+            ? TestResult::where('user_id', request()->user()->id)->where('test_id', $preTestId)->exists()
+            : false;
+    }
+
+    private function hasCompletedMaterials(Test $test): bool
+    {
+        $materialIds = $test->training
+            ? $test->training->materials()->pluck('id')
+            : collect();
+
+        if ($materialIds->isEmpty()) {
+            return false;
+        }
+
+        $completedCount = UserMaterial::where('user_id', request()->user()->id)
+            ->whereIn('material_id', $materialIds)
+            ->where('is_completed', true)
+            ->count();
+
+        return $completedCount >= $materialIds->count();
+    }
+
+    private function lockedResponse(): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Pre-Test dan materi harus diselesaikan sebelum membuka Post-Test.',
+        ], 403);
+    }
+
+    private function shuffleQuestionsForUser(Collection $questions, Test $test): Collection
+    {
+        $userId = request()->user()->id;
+
+        return $questions
+            ->sortBy(fn ($question) => crc32("{$test->id}:{$userId}:{$question->id}"))
+            ->values();
     }
 }

@@ -60,6 +60,13 @@ class TrainingController extends Controller
 
     public function markMaterialsAccessed(Request $request, Training $training): JsonResponse
     {
+        if (! $this->hasCompletedPreTest($request, $training)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pre-Test harus dikerjakan sebelum membuka materi.',
+            ], 403);
+        }
+
         $materials = $training->materials()->select('id')->get();
 
         foreach ($materials as $material) {
@@ -97,17 +104,15 @@ class TrainingController extends Controller
             ->pluck('material_id')
             ->all();
 
-        $preTestId = $training->tests()
-            ->where('type', 'pretest')
-            ->value('id');
-
-        $preTestCompleted = $preTestId
-            ? TestResult::where('user_id', $user->id)->where('test_id', $preTestId)->exists()
-            : false;
+        $preTestCompleted = $this->hasCompletedPreTest($request, $training);
 
         $completedLookup = array_flip($completedMaterialIds);
-        $materialsWithProgress = $materials->map(function ($material) use ($completedLookup) {
-            $material->setAttribute('completed', array_key_exists($material->id, $completedLookup));
+        $materialsWithProgress = $materials->map(function ($material) use ($completedLookup, $preTestCompleted) {
+            $material->setAttribute('completed', $preTestCompleted && array_key_exists($material->id, $completedLookup));
+
+            if (! $preTestCompleted) {
+                $material->setRelation('files', collect());
+            }
 
             return $material;
         });
@@ -117,9 +122,20 @@ class TrainingController extends Controller
                 'id' => $training->id,
                 'title' => $training->title,
                 'pre_test_completed' => $preTestCompleted,
-                'post_test_unlocked' => $materials->isNotEmpty() && count($completedMaterialIds) >= $materials->count(),
+                'post_test_unlocked' => $preTestCompleted && $materials->isNotEmpty() && count($completedMaterialIds) >= $materials->count(),
             ],
             'materials' => $materialsWithProgress,
         ];
+    }
+
+    private function hasCompletedPreTest(Request $request, Training $training): bool
+    {
+        $preTestId = $training->tests()
+            ->where('type', 'pretest')
+            ->value('id');
+
+        return $preTestId
+            ? TestResult::where('user_id', $request->user()->id)->where('test_id', $preTestId)->exists()
+            : false;
     }
 }

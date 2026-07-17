@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/materials/{material}/files', [MaterialController::class, 'files']);
 
     Route::middleware('role:Karyawan')->group(function () {
+        Route::get('/trainings/{training}/tests/{type}', [TestController::class, 'showByType']);
         Route::get('/tests/{test}', [TestController::class, 'show']);
         Route::get('/tests/{test}/questions', [TestController::class, 'questions']);
         Route::post('/tests/{test}/submit', [TestController::class, 'submit']);

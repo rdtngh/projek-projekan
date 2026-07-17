@@ -41,6 +41,11 @@ export const getMaterials = async () => {
   return mapMaterialProgressFromApi(res.data?.data || {});
 };
 
+export const getMaterial = async (id) => {
+  const res = await api.get(`/materials/${id}`);
+  return mapMaterialFromApi(res.data?.data || {});
+};
+
 export const markMaterialsAccessed = async (trainingId = DEFAULT_TRAINING_ID) => {
   const res = await api.post(`/trainings/${trainingId}/materials/access`);
   return mapMaterialProgressFromApi(res.data?.data || {});
