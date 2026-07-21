@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import statisticsIcon from "../../assets/icons/icon-statistik.svg";
 import certificateIcon from "../../assets/icons/icon-sertifikat.svg";
@@ -22,12 +22,54 @@ const resultSections = [
 function ExamResult({ role }) {
   const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [certificateOpen, setCertificateOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [statisticsSummary, setStatisticsSummary] = useState(null);
+  const [statisticsLoading, setStatisticsLoading] = useState(true);
   const navigate = useNavigate();
   const rolePath = role === "superadmin" ? "superadmin" : "admin";
+  const hasStatisticsData = Number(statisticsSummary?.participant_count ?? 0) > 0;
+  const exportDisabled = exporting || statisticsLoading || !hasStatisticsData;
 
-  async function exportSpss() {
-    const file = await statisticsService.exportStatistics("spss");
-    downloadFile(file);
+  useEffect(() => {
+    let active = true;
+
+    statisticsService
+      .getStatistics(role)
+      .then((statistics) => {
+        if (active) setStatisticsSummary(statistics);
+      })
+      .catch(() => {
+        if (active) setStatisticsSummary(null);
+      })
+      .finally(() => {
+        if (active) setStatisticsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [role]);
+
+  async function exportXlsx() {
+    if (!hasStatisticsData) {
+      setExportError("Belum ada data statistik yang tersedia untuk diexport.");
+      return;
+    }
+
+    setExporting(true);
+    setExportError("");
+
+    try {
+      const file = await statisticsService.exportStatistics("xlsx");
+      downloadFile(file);
+    } catch (error) {
+      setExportError(
+        error.response?.data?.message || "Export statistik gagal. Silakan coba lagi."
+      );
+    } finally {
+      setExporting(false);
+    }
   }
 
   function toggleSection(sectionId) {
@@ -53,10 +95,21 @@ function ExamResult({ role }) {
           <button
             type="button"
             className="exam-result-menu-button"
-            onClick={exportSpss}
+            onClick={exportXlsx}
+            disabled={exportDisabled}
           >
-            Export SPSS
+            {exporting ? "Mengunduh..." : "Export XLSX"}
           </button>
+          {!statisticsLoading && !hasStatisticsData && (
+            <p className="exam-result-note" role="status">
+              Belum ada data statistik yang tersedia untuk diexport.
+            </p>
+          )}
+          {exportError && (
+            <p className="exam-result-error" role="alert">
+              {exportError}
+            </p>
+          )}
         </div>
       );
     }

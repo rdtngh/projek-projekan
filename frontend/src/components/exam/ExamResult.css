@@ -118,6 +118,26 @@
   text-decoration: underline;
 }
 
+.exam-result-menu-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  text-decoration: none;
+}
+
+.exam-result-error {
+  margin: 2px 0 0;
+  color: #b91c1c;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.exam-result-note {
+  margin: 2px 0 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
 .exam-result-certificate-content p,
 .exam-result-placeholder-card p {
   color: #4b5563;

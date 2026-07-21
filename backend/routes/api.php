@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:Super Admin,Admin')->group(function () {
         Route::get('/statistics', [StatisticsController::class, 'index']);
+        Route::get('/statistics/export', [StatisticsController::class, 'export']);
         Route::post('/statistics/reset', [StatisticsController::class, 'reset']);
 
         Route::post('/materials', [MaterialController::class, 'store']);

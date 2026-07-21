@@ -16,8 +16,33 @@ export const resetStatistics = async () => {
   return unwrap(response);
 };
 
-// Kontrak export disiapkan di service; backend yang membentuk isi file statistik.
-export const exportStatistics = async (format = "spss") => ({
-  blob: new Blob(["Dummy export statistik dari backend."], { type: "text/plain" }),
-  filename: `statistik-${format}-dummy.txt`,
-});
+const filenameFromDisposition = (disposition) => {
+  const match = disposition?.match(/filename="?([^"]+)"?/i);
+  return match?.[1];
+};
+
+export const exportStatistics = async (format = "xlsx") => {
+  let response;
+
+  try {
+    response = await api.get("/statistics/export", {
+      params: { format },
+      responseType: "blob",
+    });
+  } catch (error) {
+    const data = error.response?.data;
+
+    if (data instanceof Blob && data.type.includes("application/json")) {
+      error.response.data = JSON.parse(await data.text());
+    }
+
+    throw error;
+  }
+
+  return {
+    blob: response.data,
+    filename:
+      filenameFromDisposition(response.headers["content-disposition"]) ||
+      `statistik-${format}.xlsx`,
+  };
+};

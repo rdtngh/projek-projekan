@@ -129,6 +129,15 @@ const submitTest = async (testId, payload) => {
   };
 };
 
+const mapPostTestResult = (result = {}) => ({
+  ...result,
+  status: result.passed ? "PASSED" : "FAILED",
+  correct: result.correct ?? result.correct_answers ?? 0,
+  wrong: result.wrong ?? result.wrong_answers ?? 0,
+  can_retry: Boolean(result.can_retry),
+  certificate_available: Boolean(result.certificate_available ?? result.passed),
+});
+
 export const getPreTest = async () =>
   getTrainingTestWithQuestions("pretest", DEFAULT_PRE_TEST_ID);
 
@@ -170,11 +179,12 @@ export const getPostTest = async () => {
     id: data.test.training_id,
     title: data.test.training?.title ?? "Post-Test",
   };
+  const completedResult = data.result ? mapPostTestResult(data.result) : null;
 
   return {
     training,
     materials_completed: Boolean(training.post_test_unlocked),
-    post_test: {
+    post_test: completedResult ?? {
       id: data.test.id,
       status: "NOT_STARTED",
       attempt: 1,
@@ -188,7 +198,7 @@ export const getPostTest = async () => {
       percentage: 0,
       passed: false,
     },
-    questions: data.questions,
+    questions: completedResult ? [] : data.questions,
   };
 };
 
@@ -211,14 +221,7 @@ export const submitPostTest = async (payload) => {
     payload
   );
 
-  return {
-    ...result,
-    status: result.passed ? "PASSED" : "FAILED",
-    correct: result.correct ?? result.correct_answers ?? 0,
-    wrong: result.wrong ?? result.wrong_answers ?? 0,
-    can_retry: Boolean(result.can_retry),
-    certificate_available: Boolean(result.certificate_available ?? result.passed),
-  };
+  return mapPostTestResult(result);
 };
 
 export const retryPostTest = async () => getPostTest();
