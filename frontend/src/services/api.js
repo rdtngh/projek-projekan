@@ -5,14 +5,20 @@ const api = axios.create({
     timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 15000,
 });
 
+const getLoginPath = () => {
+    const basePath = new URL(import.meta.env.BASE_URL, window.location.origin).pathname;
+    return `${basePath.replace(/\/$/, "")}/login`;
+};
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401 && typeof window !== "undefined") {
             window.localStorage.removeItem("authToken");
             window.localStorage.removeItem("authUser");
-            if (import.meta.env.VITE_REQUIRE_AUTH === "true" && window.location.pathname !== "/login") {
-                window.location.assign("/login");
+            const loginPath = getLoginPath();
+            if (window.location.pathname !== loginPath) {
+                window.location.assign(loginPath);
             }
         }
         return Promise.reject(error);

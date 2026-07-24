@@ -3,7 +3,6 @@ import * as authService from "../../services/authService";
 
 function ProtectedRoute({ allowedRoles, children }) {
   const location = useLocation();
-  if (import.meta.env.VITE_REQUIRE_AUTH !== "true") return children;
 
   const user = authService.getStoredUser();
   const role = authService.normalizeRole(user?.role);
